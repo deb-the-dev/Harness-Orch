@@ -1,0 +1,79 @@
+{
+  "cores": 4,
+  "mock_latency_ms": 20,
+  "timeout_ms": 2000,
+  "overhead": {
+    "direct": {
+      "sequential": {
+        "n": 2000,
+        "p50_ms": 21.82,
+        "p95_ms": 23.04,
+        "p99_ms": 24.69
+      },
+      "concurrent16": {
+        "n": 5000,
+        "p50_ms": 22.22,
+        "p95_ms": 24.96,
+        "p99_ms": 28.91,
+        "throughput_rps": 708
+      }
+    },
+    "litellm": {
+      "sequential": {
+        "n": 2000,
+        "p50_ms": 41.79,
+        "p95_ms": 52.9,
+        "p99_ms": 62.88
+      },
+      "concurrent16": {
+        "n": 5000,
+        "p50_ms": 251.15,
+        "p95_ms": 330.73,
+        "p99_ms": 369.73,
+        "throughput_rps": 62
+      }
+    },
+    "portkey": {
+      "sequential": {
+        "n": 2000,
+        "p50_ms": 25.1,
+        "p95_ms": 28.14,
+        "p99_ms": 31.86
+      },
+      "concurrent16": {
+        "n": 5000,
+        "p50_ms": 32.24,
+        "p95_ms": 44.76,
+        "p99_ms": 53.05,
+        "throughput_rps": 477
+      }
+    }
+  },
+  "streaming": {
+    "direct": {
+      "complete_streams": 100,
+      "ttfb": {
+        "n": 100,
+        "p50_ms": 21.55,
+        "p95_ms": 22.44,
+        "p99_ms": 23.56
+      },
+      "total": {
+        "n": 100,
+        "p50_ms": 232.09,
+        "p95_ms": 236.64,
+        "p99_ms": 237.35
+      }
+    },
+    "litellm": {
+      "complete_streams": 0,
+      "ttfb": null,
+      "total": null
+    },
+    "portkey": {
+      "complete_streams": 0,
+      "ttfb": null,
+      "total": null
+    }
+  }
+}

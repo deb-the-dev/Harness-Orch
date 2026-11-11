@@ -1,0 +1,51 @@
+{
+  "cores": 4,
+  "mock_latency_ms": 20,
+  "timeout_ms": 2000,
+  "streaming": {
+    "direct": {
+      "complete_streams": 100,
+      "status": {
+        "200": 100
+      },
+      "ttfb": {
+        "n": 100,
+        "p50_ms": 21.92,
+        "p95_ms": 22.58,
+        "p99_ms": 25.02
+      },
+      "total": {
+        "n": 100,
+        "p50_ms": 233.62,
+        "p95_ms": 236.98,
+        "p99_ms": 238.82
+      }
+    },
+    "litellm": {
+      "complete_streams": 100,
+      "status": {
+        "200": 100
+      },
+      "ttfb": {
+        "n": 100,
+        "p50_ms": 38.49,
+        "p95_ms": 46.7,
+        "p99_ms": 53.92
+      },
+      "total": {
+        "n": 100,
+        "p50_ms": 256.67,
+        "p95_ms": 268.56,
+        "p99_ms": 316.27
+      }
+    },
+    "portkey": {
+      "complete_streams": 0,
+      "status": {
+        "500": 100
+      },
+      "ttfb": null,
+      "total": null
+    }
+  }
+}

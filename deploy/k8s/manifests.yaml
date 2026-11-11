@@ -1,0 +1,146 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: harness-orch
+  labels:
+    app.kubernetes.io/name: harness-orch
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: harness-opa-policy
+  namespace: harness-orch
+data:
+  hooks.rego: |
+    package hooks
+    import rego.v1
+    pack := object.get(data.packs, input.pack, {"tools": [], "models": [], "restricted_regions": []})
+    verdict := "block" if { count(block_reasons) > 0 } else := "require_approval" if { count(approval_reasons) > 0 } else := "modify" if { count(modify_reasons) > 0 } else := "allow"
+    decision := {"verdict": "block", "reasons": ["malformed_input"]} if { not valid_input } else := {"verdict": verdict, "reasons": sort([r | some r in (block_reasons | approval_reasons | modify_reasons)])}
+    valid_input if { input.action_class in {"read", "internal_write", "external_comm", "payment"}; valid_for_hook }
+    valid_for_hook if { input.hook == "pre_model"; is_number(input.spend.run_usd); is_number(input.spend.est_call_usd); is_number(input.spend.run_limit_usd); input.data_class in {"public", "internal", "confidential", "restricted"}; is_string(input.model); is_string(input.model_region) }
+    valid_for_hook if { input.hook == "post_model"; is_boolean(input.output.contains_pii) }
+    valid_for_hook if { input.hook == "pre_tool"; is_string(input.tool); input.approval.state in {"none", "pending", "approved", "rejected"} }
+    valid_for_hook if { input.hook == "post_tool"; is_number(input.output.bytes) }
+    block_reasons contains "payment_out_of_scope" if input.action_class == "payment"
+    block_reasons contains "tool_not_granted" if { input.hook == "pre_tool"; not input.tool in pack.tools }
+    block_reasons contains "approval_rejected" if { input.hook == "pre_tool"; input.action_class == "external_comm"; input.approval.state == "rejected" }
+    block_reasons contains "budget_hard_limit" if { input.hook == "pre_model"; input.spend.run_usd + input.spend.est_call_usd > input.spend.run_limit_usd }
+    block_reasons contains "residency" if { input.hook == "pre_model"; input.data_class == "restricted"; not input.model_region in pack.restricted_regions }
+    block_reasons contains "model_not_allowed" if { input.hook == "pre_model"; input.data_class in {"confidential", "restricted"}; not input.model in pack.models }
+    approval_reasons contains "external_comm_needs_approval" if { input.hook == "pre_tool"; input.action_class == "external_comm"; input.approval.state in {"none", "pending"} }
+    modify_reasons contains "redact_pii" if { input.hook == "post_model"; input.output.contains_pii }
+    modify_reasons contains "truncate_result" if { input.hook == "post_tool"; input.output.bytes > data.limits.max_tool_result_bytes }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: harness-control-plane
+  namespace: harness-orch
+  labels:
+    app: harness-control-plane
+    role: router
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: harness-control-plane
+  template:
+    metadata:
+      labels:
+        app: harness-control-plane
+        role: router
+    spec:
+      containers:
+        - name: control-plane
+          image: ghcr.io/deb-the-dev/harness-orch:0.1.0
+          ports:
+            - containerPort: 8080
+              name: http
+          env:
+            - name: HARNESS_OPA_SOCKET
+              value: "/run/opa/opa.sock"
+            - name: HARNESS_PG_DSN
+              valueFrom:
+                secretKeyRef:
+                  name: harness-db-credentials
+                  key: dsn
+                  optional: true
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+            initialDelaySeconds: 3
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          volumeMounts:
+            - name: opa-socket
+              mountPath: /run/opa
+        - name: opa-sidecar
+          image: openpolicyagent/opa:1.2.0-static
+          args:
+            - "run"
+            - "--server"
+            - "--addr=unix:///run/opa/opa.sock"
+            - "/policies/hooks.rego"
+          volumeMounts:
+            - name: opa-socket
+              mountPath: /run/opa
+            - name: opa-policy
+              mountPath: /policies
+              readOnly: true
+      volumes:
+        - name: opa-socket
+          emptyDir: {}
+        - name: opa-policy
+          configMap:
+            name: harness-opa-policy
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: harness-control-plane
+  namespace: harness-orch
+spec:
+  selector:
+    app: harness-control-plane
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
+---
+# Enforces PRD & Architecture invariant: agent workers and external harnesses can ONLY reach model providers via the router
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: force-worker-egress-via-router
+  namespace: harness-orch
+spec:
+  podSelector:
+    matchLabels:
+      role: agent-worker
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              role: router
+      ports:
+        - protocol: TCP
+          port: 8080
+    - to:
+        - namespaceSelector: {}
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53

@@ -1,0 +1,152 @@
+# FDE Enterprise Deployment Blueprint (Harness-Orch v0.1)
+# Used by Forward Deployed Engineers to configure tenant context, routing maps, memory, skills, and task logs.
+
+organization:
+  org_id: "org-acme-global"
+  name: "Acme Global Financial Operations"
+  region: "eu"
+  residency_policy: "strict-regional"
+
+memory_engine: "graphiti"
+
+routing_map:
+  - task_class: "extract"
+    step_role: "extract"
+    priors:
+      m-small: 0.93
+      m-medium: 0.94
+      m-large: 0.95
+    quality_tolerance: 0.03
+    cost_weight: 0.25
+    latency_weight: 0.10
+    cache_affinity_bonus: 0.02
+
+  - task_class: "reconcile"
+    step_role: "reconcile_terms"
+    priors:
+      m-small: 0.81
+      m-medium: 0.93
+      m-large: 0.95
+    quality_tolerance: 0.03
+    cost_weight: 0.20
+    latency_weight: 0.10
+    cache_affinity_bonus: 0.02
+
+  - task_class: "clause_review"
+    step_role: "clause_extraction"
+    priors:
+      m-small: 0.76
+      m-medium: 0.90
+      m-large: 0.96
+    quality_tolerance: 0.03
+    cost_weight: 0.15
+    latency_weight: 0.05
+    cache_affinity_bonus: 0.03
+
+  - task_class: "negotiation"
+    step_role: "negotiation_strategy"
+    priors:
+      m-small: 0.72
+      m-medium: 0.85
+      m-large: 0.96
+    quality_tolerance: 0.03
+    cost_weight: 0.10
+    latency_weight: 0.05
+    cache_affinity_bonus: 0.03
+
+context_items:
+  - source_id: "corp-policy-repo"
+    external_id: "AP-FIN-001"
+    kind: "policy"
+    title: "Global Accounts Payable & Payout Terms Policy"
+    content: "Standard payment terms are Net-45. Any vendor contract requesting Net-15 or upfront payment over $25,000 must be classified as high risk and escalated. Triggering direct payments from automated agents is strictly prohibited."
+    version_no: 2
+    effective_from: 1700000000
+    owner: "vp-finance@acme.example"
+    data_class: "internal"
+    allowed_teams: ["finance", "fde", "platform"]
+
+  - source_id: "corp-policy-repo"
+    external_id: "PROC-RENEWAL-004"
+    kind: "policy"
+    title: "Vendor Renewal Negotiation Playbook"
+    content: "For annual SaaS renewals exceeding $50,000, target a 10% to 15% volume discount on multi-year commitments. All outbound vendor counter-offer emails are draft-only and require human sign-off."
+    version_no: 1
+    effective_from: 1700000000
+    owner: "procurement-lead@acme.example"
+    data_class: "confidential"
+    allowed_teams: ["finance", "fde"]
+
+skills:
+  - name: "ap_three_way_match"
+    description: "Three-way reconciliation procedure matching purchase order, goods receipt, and vendor invoice."
+    body: "Step 1: Verify PO number and approved cap. Step 2: Reconcile line-item unit prices within 0.5% tolerance. Step 3: Log discrepancy_usd and block payment execution."
+    version_no: 1
+    owner: "fde-team"
+    data_class: "internal"
+    allowed_teams: ["finance", "fde"]
+
+  - name: "vendor_counteroffer_drafting"
+    description: "Standard template and tone guidelines for drafting vendor renewal counter-offers."
+    body: "Always reference historical SLA attainment, propose a 12.5% discount for a 24-month lock-in, and route the draft to approval wait before external dispatch."
+    version_no: 1
+    owner: "fde-team"
+    data_class: "confidential"
+    allowed_teams: ["finance", "fde"]
+
+memory_facts:
+  - scope_type: "org"
+    scope_id: "org-acme-global"
+    key: "preferred_invoice_currency"
+    content: "All reconciled AP ledger entries must normalize currency discrepancies to USD before logging."
+    data_class: "internal"
+    tags: ["invoice", "currency", "reconcile"]
+
+  - scope_type: "team"
+    scope_id: "finance"
+    key: "acme_cloud_corp_history"
+    content: "Acme Cloud Corp granted a 12.5% renewal discount in FY25 when offered a 2-year term."
+    data_class: "confidential"
+    tags: ["vendor", "renewal", "discount"]
+
+task_logs:
+  - task_class: "extract"
+    step_role: "extract"
+    model_id: "m-small"
+    success: true
+    cost_usd: 0.00008
+    latency_ms: 85.0
+    verifier_score: 0.96
+  - task_class: "extract"
+    step_role: "extract"
+    model_id: "m-small"
+    success: true
+    cost_usd: 0.00009
+    latency_ms: 92.0
+    verifier_score: 0.95
+  - task_class: "reconcile"
+    step_role: "reconcile_terms"
+    model_id: "m-medium"
+    success: true
+    cost_usd: 0.00045
+    latency_ms: 190.0
+    verifier_score: 0.94
+
+custom_workflows:
+  - name: "fde_audit_triage"
+    task_class: "extract"
+    data_class: "internal"
+    allowed_models: ["m-small", "m-medium", "m-large"]
+    restricted_regions: ["me", "eu"]
+    steps:
+      - kind: "model"
+        step_role: "extract"
+        system_prompt: "Extract vendor and amount as JSON using enterprise context."
+        input_key: "invoice_text"
+        required_json_keys: ["vendor", "amount"]
+        context_query: "invoice currency policy"
+      - kind: "tool"
+        tool_name: "log_invoice"
+        tool_arg_mapping:
+          vendor: "vendor"
+          amount: "amount"

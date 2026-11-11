@@ -1,0 +1,32 @@
+replicaCount: 2
+
+image:
+  repository: ghcr.io/deb-the-dev/harness-orch
+  tag: "0.1.0"
+  pullPolicy: IfNotPresent
+
+opa:
+  image: openpolicyagent/opa:1.2.0-static
+  useUnixSocket: true
+
+service:
+  type: ClusterIP
+  port: 8080
+
+fde:
+  orgId: "org-enterprise-prod"
+  orgName: "Global Enterprise Deployment"
+  region: "eu"
+  memoryEngine: "graphiti"
+  costSavingTarget: 0.30
+
+networkPolicy:
+  enforceRouterEgressOnly: true
+
+resources:
+  limits:
+    cpu: "1000m"
+    memory: "1Gi"
+  requests:
+    cpu: "250m"
+    memory: "512Mi"

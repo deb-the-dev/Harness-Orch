@@ -1,0 +1,13 @@
+apiVersion: v2
+name: harness-orch
+description: Enterprise Agent Control Harness, Step-Aware Model Router, and FDE Orchestration Layer
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+keywords:
+  - agent-harness
+  - model-router
+  - opa-policy
+  - fde-orchestration
+maintainers:
+  - name: Deboshruto Sarkar

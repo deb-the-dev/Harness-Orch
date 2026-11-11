@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-control-plane
+  labels:
+    app: {{ .Release.Name }}-control-plane
+    role: router
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-control-plane
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-control-plane
+        role: router
+    spec:
+      containers:
+        - name: control-plane
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.service.port }}
+              name: http
+          env:
+            - name: HARNESS_ORG_ID
+              value: {{ .Values.fde.orgId | quote }}
+            - name: HARNESS_ORG_REGION
+              value: {{ .Values.fde.region | quote }}
+            - name: HARNESS_MEMORY_ENGINE
+              value: {{ .Values.fde.memoryEngine | quote }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-control-plane
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app: {{ .Release.Name }}-control-plane

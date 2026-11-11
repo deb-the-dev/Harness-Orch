@@ -1,0 +1,79 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: harness-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: pgpassword
+      POSTGRES_DB: harness
+    ports:
+      - "55432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./src/harness/migrations:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d harness"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  opa:
+    image: openpolicyagent/opa:1.2.0-static
+    container_name: harness-opa
+    command:
+      - "run"
+      - "--server"
+      - "--addr=0.0.0.0:8181"
+      - "/policies/hooks.rego"
+    volumes:
+      - ./policies:/policies:ro
+    ports:
+      - "8181:8181"
+
+  control-plane:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: harness-control-plane
+    environment:
+      HARNESS_PG_DSN: "postgresql://postgres:pgpassword@postgres:5432/harness"
+      HARNESS_OPA_URL: "http://opa:8181"
+      HARNESS_FDE_CONFIG: "/app/configs/fde_enterprise_deployment.yaml"
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      opa:
+        condition: service_started
+    volumes:
+      - ./configs:/app/configs:ro
+      - artifacts_data:/tmp/harness-artifacts
+
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: harness-worker
+    command:
+      - "python"
+      - "-c"
+      - "import asyncio; from harness.fde import FDEDeployment; print('Stateless FDE Worker Pool initialized and ready')"
+    environment:
+      HARNESS_PG_DSN: "postgresql://postgres:pgpassword@postgres:5432/harness"
+      HARNESS_OPA_URL: "http://opa:8181"
+      HARNESS_FDE_CONFIG: "/app/configs/fde_enterprise_deployment.yaml"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      opa:
+        condition: service_started
+    volumes:
+      - ./configs:/app/configs:ro
+      - artifacts_data:/tmp/harness-artifacts
+
+volumes:
+  pgdata:
+  artifacts_data:

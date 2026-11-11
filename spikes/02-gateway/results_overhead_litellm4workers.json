@@ -1,0 +1,37 @@
+{
+  "cores": 4,
+  "mock_latency_ms": 20,
+  "timeout_ms": 2000,
+  "overhead": {
+    "direct": {
+      "sequential": {
+        "n": 2000,
+        "p50_ms": 21.76,
+        "p95_ms": 23.29,
+        "p99_ms": 25.74
+      },
+      "concurrent16": {
+        "n": 5000,
+        "p50_ms": 22.42,
+        "p95_ms": 26.33,
+        "p99_ms": 32.21,
+        "throughput_rps": 695
+      }
+    },
+    "litellm": {
+      "sequential": {
+        "n": 2000,
+        "p50_ms": 39.63,
+        "p95_ms": 49.65,
+        "p99_ms": 56.31
+      },
+      "concurrent16": {
+        "n": 5000,
+        "p50_ms": 80.55,
+        "p95_ms": 212.85,
+        "p99_ms": 237.81,
+        "throughput_rps": 134
+      }
+    }
+  }
+}

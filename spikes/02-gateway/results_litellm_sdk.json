@@ -1,0 +1,32 @@
+{
+  "direct": {
+    "sequential": {
+      "n": 2000,
+      "p50_ms": 21.65,
+      "p95_ms": 23.01,
+      "p99_ms": 25.43
+    },
+    "concurrent16": {
+      "n": 5000,
+      "p50_ms": 22.67,
+      "p95_ms": 25.82,
+      "p99_ms": 32.89,
+      "throughput_rps": 687
+    }
+  },
+  "litellm_sdk": {
+    "sequential": {
+      "n": 2000,
+      "p50_ms": 28.4,
+      "p95_ms": 32.63,
+      "p99_ms": 35.72
+    },
+    "concurrent16": {
+      "n": 5000,
+      "p50_ms": 99.73,
+      "p95_ms": 133.03,
+      "p99_ms": 153.85,
+      "throughput_rps": 156
+    }
+  }
+}

@@ -1,0 +1,100 @@
+# Spike 4 base: three namespaces and stub workloads.
+#   agents   : the worker pod (must reach ONLY the router)
+#   router   : stands in for our model router (the only allowed path to a provider)
+#   external : stands in for a model provider (must NOT be reachable from agents directly)
+apiVersion: v1
+kind: Namespace
+metadata: {name: agents, labels: {spike4: agents}}
+---
+apiVersion: v1
+kind: Namespace
+metadata: {name: router, labels: {spike4: router}}
+---
+apiVersion: v1
+kind: Namespace
+metadata: {name: external, labels: {spike4: external}}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata: {name: stub, namespace: router}
+data:
+  stub.py: |
+    import http.server, os, urllib.request
+    NAME = os.environ["STUB_NAME"]; UPSTREAM = os.environ.get("UPSTREAM")
+    class H(http.server.BaseHTTPRequestHandler):
+        def do_GET(self):
+            body = NAME
+            if UPSTREAM and self.path == "/via":   # router calls the provider on the caller's behalf
+                try: body += " -> " + urllib.request.urlopen(UPSTREAM, timeout=3).read().decode()
+                except Exception as e: body += " -> upstream-failed:" + type(e).__name__
+            self.send_response(200); self.end_headers(); self.wfile.write(body.encode())
+        def log_message(self, *a): pass
+    http.server.ThreadingHTTPServer(("0.0.0.0", 8080), H).serve_forever()
+---
+apiVersion: v1
+kind: ConfigMap
+metadata: {name: stub, namespace: external}
+data:
+  stub.py: |
+    import http.server
+    class H(http.server.BaseHTTPRequestHandler):
+        def do_GET(self):
+            self.send_response(200); self.end_headers(); self.wfile.write(b"provider-reached-directly")
+        def log_message(self, *a): pass
+    http.server.ThreadingHTTPServer(("0.0.0.0", 8080), H).serve_forever()
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata: {name: router, namespace: router}
+spec:
+  replicas: 1
+  selector: {matchLabels: {app: router}}
+  template:
+    metadata: {labels: {app: router}}
+    spec:
+      containers:
+        - name: stub
+          image: python:3.13-slim
+          command: ["python", "/app/stub.py"]
+          env:
+            - {name: STUB_NAME, value: router-ok}
+            - {name: UPSTREAM, value: "http://provider.external.svc.cluster.local:8080/"}
+          ports: [{containerPort: 8080}]
+          volumeMounts: [{name: code, mountPath: /app}]
+      volumes: [{name: code, configMap: {name: stub}}]
+---
+apiVersion: v1
+kind: Service
+metadata: {name: router, namespace: router}
+spec: {selector: {app: router}, ports: [{port: 8080, targetPort: 8080}]}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata: {name: provider, namespace: external}
+spec:
+  replicas: 1
+  selector: {matchLabels: {app: provider}}
+  template:
+    metadata: {labels: {app: provider}}
+    spec:
+      containers:
+        - name: stub
+          image: python:3.13-slim
+          command: ["python", "/app/stub.py"]
+          ports: [{containerPort: 8080}]
+          volumeMounts: [{name: code, mountPath: /app}]
+      volumes: [{name: code, configMap: {name: stub}}]
+---
+apiVersion: v1
+kind: Service
+metadata: {name: provider, namespace: external}
+spec: {selector: {app: provider}, ports: [{port: 8080, targetPort: 8080}]}
+---
+apiVersion: v1
+kind: Pod
+metadata: {name: worker, namespace: agents, labels: {app: worker}}
+spec:
+  containers:
+    - name: worker
+      image: python:3.13-slim
+      command: ["sleep", "infinity"]

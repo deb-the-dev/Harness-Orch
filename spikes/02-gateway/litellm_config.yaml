@@ -1,0 +1,14 @@
+model_list:
+  - model_name: agent-model
+    litellm_params: {model: openai/mock-primary, api_base: "http://127.0.0.1:9001/primary/v1", api_key: sk-mock}
+  - model_name: agent-model-fallback
+    litellm_params: {model: openai/mock-fallback, api_base: "http://127.0.0.1:9001/fallback/v1", api_key: sk-mock}
+  # Configured on the gateway but NOT in any fallback list: the allowed-set test must never reach it.
+  - model_name: other-model
+    litellm_params: {model: openai/mock-disallowed, api_base: "http://127.0.0.1:9001/disallowed/v1", api_key: sk-mock}
+router_settings:
+  num_retries: 1
+  timeout: 2
+  fallbacks: [{"agent-model": ["agent-model-fallback"]}]
+litellm_settings:
+  drop_params: true

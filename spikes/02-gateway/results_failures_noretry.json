@@ -1,0 +1,171 @@
+{
+  "cores": 4,
+  "mock_latency_ms": 20,
+  "timeout_ms": 2000,
+  "failures": {
+    "litellm": {
+      "primary_500": {
+        "requests": 100,
+        "status": {
+          "200": 100
+        },
+        "served_by": {
+          "fallback": 100
+        },
+        "latency": {
+          "n": 100,
+          "p50_ms": 67.74,
+          "p95_ms": 95.32,
+          "p99_ms": 120.25
+        },
+        "backend_hits": {
+          "primary": 100,
+          "fallback": 100,
+          "disallowed": 0
+        }
+      },
+      "primary_429": {
+        "requests": 100,
+        "status": {
+          "200": 100
+        },
+        "served_by": {
+          "fallback": 100
+        },
+        "latency": {
+          "n": 100,
+          "p50_ms": 68.09,
+          "p95_ms": 101.33,
+          "p99_ms": 171.36
+        },
+        "backend_hits": {
+          "primary": 100,
+          "fallback": 100,
+          "disallowed": 0
+        }
+      },
+      "primary_hang": {
+        "requests": 15,
+        "status": {
+          "200": 15
+        },
+        "served_by": {
+          "fallback": 15
+        },
+        "latency": {
+          "n": 15,
+          "p50_ms": 2063.87,
+          "p95_ms": 2083.46,
+          "p99_ms": 2083.46
+        },
+        "backend_hits": {
+          "primary": 15,
+          "fallback": 15,
+          "disallowed": 0
+        }
+      },
+      "primary_and_fallback_500": {
+        "requests": 50,
+        "status": {
+          "500": 50
+        },
+        "served_by": {
+          "None": 50
+        },
+        "latency": {
+          "n": 50,
+          "p50_ms": 59.58,
+          "p95_ms": 83.57,
+          "p99_ms": 335.81
+        },
+        "backend_hits": {
+          "primary": 50,
+          "fallback": 50,
+          "disallowed": 0
+        }
+      }
+    },
+    "portkey": {
+      "primary_500": {
+        "requests": 100,
+        "status": {
+          "200": 100
+        },
+        "served_by": {
+          "fallback": 100
+        },
+        "latency": {
+          "n": 100,
+          "p50_ms": 31.07,
+          "p95_ms": 38.18,
+          "p99_ms": 62.27
+        },
+        "backend_hits": {
+          "primary": 100,
+          "fallback": 100,
+          "disallowed": 0
+        }
+      },
+      "primary_429": {
+        "requests": 100,
+        "status": {
+          "200": 100
+        },
+        "served_by": {
+          "fallback": 100
+        },
+        "latency": {
+          "n": 100,
+          "p50_ms": 29.58,
+          "p95_ms": 36.44,
+          "p99_ms": 58.16
+        },
+        "backend_hits": {
+          "primary": 100,
+          "fallback": 100,
+          "disallowed": 0
+        }
+      },
+      "primary_hang": {
+        "requests": 15,
+        "status": {
+          "200": 15
+        },
+        "served_by": {
+          "fallback": 15
+        },
+        "latency": {
+          "n": 15,
+          "p50_ms": 2031.4,
+          "p95_ms": 2033.11,
+          "p99_ms": 2033.11
+        },
+        "backend_hits": {
+          "primary": 15,
+          "fallback": 15,
+          "disallowed": 0
+        }
+      },
+      "primary_and_fallback_500": {
+        "requests": 50,
+        "status": {
+          "500": 50
+        },
+        "served_by": {
+          "None": 50
+        },
+        "latency": {
+          "n": 50,
+          "p50_ms": 8.92,
+          "p95_ms": 12.74,
+          "p99_ms": 35.68
+        },
+        "backend_hits": {
+          "primary": 50,
+          "fallback": 50,
+          "disallowed": 0
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,99 @@
+{
+  "cores": 4,
+  "rules": 9,
+  "packs": 25,
+  "tools_per_pack": 30,
+  "parity": {
+    "checked": 5000,
+    "mismatches": 0,
+    "verdict_mix": {
+      "modify": 147,
+      "allow": 3389,
+      "block": 1450,
+      "require_approval": 14
+    },
+    "first_mismatches": []
+  },
+  "own_inprocess": {
+    "sequential": {
+      "n": 10000,
+      "p50_ms": 0.002,
+      "p95_ms": 0.004,
+      "p99_ms": 0.006,
+      "max_ms": 0.553,
+      "throughput_rps": 390376
+    }
+  },
+  "own_http_tcp": {
+    "sequential": {
+      "n": 10000,
+      "p50_ms": 0.307,
+      "p95_ms": 0.549,
+      "p99_ms": 1.156,
+      "max_ms": 36.472,
+      "throughput_rps": 2729
+    },
+    "concurrent16": {
+      "n": 30000,
+      "p50_ms": 1.756,
+      "p95_ms": 3.39,
+      "p99_ms": 5.209,
+      "max_ms": 18.456,
+      "throughput_rps": 7829
+    }
+  },
+  "own_http_uds": {
+    "sequential": {
+      "n": 10000,
+      "p50_ms": 0.358,
+      "p95_ms": 0.526,
+      "p99_ms": 0.816,
+      "max_ms": 17.812,
+      "throughput_rps": 2634
+    },
+    "concurrent16": {
+      "n": 30000,
+      "p50_ms": 1.657,
+      "p95_ms": 3.09,
+      "p99_ms": 4.253,
+      "max_ms": 10.784,
+      "throughput_rps": 7858
+    }
+  },
+  "opa_rest_tcp": {
+    "sequential": {
+      "n": 10000,
+      "p50_ms": 0.644,
+      "p95_ms": 0.968,
+      "p99_ms": 2.03,
+      "max_ms": 8.6,
+      "throughput_rps": 1428
+    },
+    "concurrent16": {
+      "n": 30000,
+      "p50_ms": 2.393,
+      "p95_ms": 6.621,
+      "p99_ms": 11.115,
+      "max_ms": 65.051,
+      "throughput_rps": 5371
+    }
+  },
+  "opa_rest_uds": {
+    "sequential": {
+      "n": 10000,
+      "p50_ms": 0.673,
+      "p95_ms": 1.04,
+      "p99_ms": 2.334,
+      "max_ms": 21.333,
+      "throughput_rps": 1357
+    },
+    "concurrent16": {
+      "n": 30000,
+      "p50_ms": 2.384,
+      "p95_ms": 6.884,
+      "p99_ms": 12.582,
+      "max_ms": 29.971,
+      "throughput_rps": 5454
+    }
+  }
+}

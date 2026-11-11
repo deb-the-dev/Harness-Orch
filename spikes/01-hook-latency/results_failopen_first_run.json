@@ -1,0 +1,206 @@
+{
+  "cores": 4,
+  "rules": 9,
+  "packs": 25,
+  "tools_per_pack": 30,
+  "parity": {
+    "checked": 5000,
+    "mismatches": 17,
+    "verdict_mix": {
+      "modify": 172,
+      "allow": 3421,
+      "block": 1392,
+      "require_approval": 15
+    },
+    "first_mismatches": [
+      {
+        "input": {
+          "hook": "pre_tool",
+          "pack": "pack_unknown",
+          "action_class": "read",
+          "data_class": "public",
+          "model": "model_39",
+          "model_region": "me",
+          "tool": "tool_013",
+          "approval": {
+            "state": "pending"
+          },
+          "spend": {
+            "run_usd": 4.8748,
+            "est_call_usd": 0.1087,
+            "run_limit_usd": 10.0
+          },
+          "output": {
+            "contains_pii": true,
+            "bytes": 225575
+          },
+          "run_id": "run_577375",
+          "step_id": "step_3846"
+        },
+        "opa": {
+          "reasons": [],
+          "verdict": "allow"
+        },
+        "own": {
+          "verdict": "block",
+          "reasons": [
+            "tool_not_granted"
+          ]
+        }
+      },
+      {
+        "input": {
+          "hook": "pre_model",
+          "pack": "pack_unknown",
+          "action_class": "internal_write",
+          "data_class": "restricted",
+          "model": "model_53",
+          "model_region": "eu",
+          "tool": "tool_106",
+          "approval": {
+            "state": "none"
+          },
+          "spend": {
+            "run_usd": 0.1562,
+            "est_call_usd": 0.041,
+            "run_limit_usd": 10.0
+          },
+          "output": {
+            "contains_pii": false,
+            "bytes": 111947
+          },
+          "run_id": "run_006608",
+          "step_id": "step_5267"
+        },
+        "opa": {
+          "reasons": [],
+          "verdict": "allow"
+        },
+        "own": {
+          "verdict": "block",
+          "reasons": [
+            "model_not_allowed",
+            "residency"
+          ]
+        }
+      },
+      {
+        "input": {
+          "hook": "pre_tool",
+          "pack": "pack_unknown",
+          "action_class": "internal_write",
+          "data_class": "public",
+          "model": "model_30",
+          "model_region": "me",
+          "tool": "tool_028",
+          "approval": {
+            "state": "pending"
+          },
+          "spend": {
+            "run_usd": 3.492,
+            "est_call_usd": 0.564,
+            "run_limit_usd": 10.0
+          },
+          "output": {
+            "contains_pii": true,
+            "bytes": 442549
+          },
+          "run_id": "run_506158",
+          "step_id": "step_7213"
+        },
+        "opa": {
+          "reasons": [],
+          "verdict": "allow"
+        },
+        "own": {
+          "verdict": "block",
+          "reasons": [
+            "tool_not_granted"
+          ]
+        }
+      }
+    ]
+  },
+  "own_inprocess": {
+    "sequential": {
+      "n": 10000,
+      "p50_ms": 0.001,
+      "p95_ms": 0.002,
+      "p99_ms": 0.003,
+      "max_ms": 0.068,
+      "throughput_rps": 800881
+    }
+  },
+  "own_http_tcp": {
+    "sequential": {
+      "n": 10000,
+      "p50_ms": 0.38,
+      "p95_ms": 0.617,
+      "p99_ms": 1.227,
+      "max_ms": 104.035,
+      "throughput_rps": 2280
+    },
+    "concurrent16": {
+      "n": 30000,
+      "p50_ms": 3.058,
+      "p95_ms": 4.005,
+      "p99_ms": 6.322,
+      "max_ms": 40.91,
+      "throughput_rps": 5620
+    }
+  },
+  "own_http_uds": {
+    "sequential": {
+      "n": 10000,
+      "p50_ms": 0.321,
+      "p95_ms": 0.587,
+      "p99_ms": 1.246,
+      "max_ms": 6.956,
+      "throughput_rps": 2648
+    },
+    "concurrent16": {
+      "n": 30000,
+      "p50_ms": 1.846,
+      "p95_ms": 3.954,
+      "p99_ms": 6.168,
+      "max_ms": 21.188,
+      "throughput_rps": 6953
+    }
+  },
+  "opa_rest_tcp": {
+    "sequential": {
+      "n": 10000,
+      "p50_ms": 0.693,
+      "p95_ms": 1.109,
+      "p99_ms": 2.667,
+      "max_ms": 107.396,
+      "throughput_rps": 1292
+    },
+    "concurrent16": {
+      "n": 30000,
+      "p50_ms": 3.066,
+      "p95_ms": 6.703,
+      "p99_ms": 11.111,
+      "max_ms": 23.685,
+      "throughput_rps": 4803
+    }
+  },
+  "opa_rest_uds": {
+    "sequential": {
+      "n": 10000,
+      "p50_ms": 0.666,
+      "p95_ms": 1.029,
+      "p99_ms": 2.23,
+      "max_ms": 8.349,
+      "throughput_rps": 1375
+    },
+    "concurrent16": {
+      "n": 30000,
+      "p50_ms": 2.86,
+      "p95_ms": 6.509,
+      "p99_ms": 10.321,
+      "max_ms": 49.468,
+      "throughput_rps": 5106
+    }
+  }
+}
