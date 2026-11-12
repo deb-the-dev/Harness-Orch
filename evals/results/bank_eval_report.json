@@ -1,0 +1,71 @@
+{
+  "dataset": {
+    "table_count": 10,
+    "tables": {
+      "customers": 4,
+      "accounts": 4,
+      "transactions": 5,
+      "cards": 4,
+      "disputes_chargebacks": 3,
+      "refund_requests": 3,
+      "fraud_alerts": 3,
+      "kyc_aml_profiles": 4,
+      "financial_plans": 3,
+      "policy_rules": 5
+    },
+    "task_log_count": 46,
+    "task_log_classes": [
+      "attest_refund",
+      "draft_customer_notice",
+      "rebalance_financial_plan",
+      "triage_dispute",
+      "verify_fraud_signals"
+    ],
+    "context_items": 5,
+    "skills": 2,
+    "memory_facts": 2
+  },
+  "checks": {
+    "customer_service_approval_flow": {
+      "passed": true,
+      "run_id": "run-01a1ce19-a88d-7000-aa70-4e60cac30c37",
+      "memory_access_events": 1,
+      "models_used": [
+        "m-small",
+        "m-small"
+      ]
+    },
+    "customer_service_rejection_gate": {
+      "passed": true,
+      "notice_sent": false
+    },
+    "financial_planner_refund_attestation": {
+      "passed": true,
+      "attestation": {
+        "amount_usd": 680.0,
+        "attest_approved": true,
+        "reason": "Verified duplicate/fraud claim under POL-BNK-001/002"
+      }
+    },
+    "financial_planner_aml_block_and_subagent": {
+      "passed": true,
+      "attest_approved": false,
+      "subagent_ok": true
+    },
+    "harness_controls": {
+      "payment_tool_blocked": true,
+      "residency_enforced": true,
+      "pii_redaction_triggered": true,
+      "policy_violations_reaching_execution": 0
+    }
+  },
+  "replay_eval": {
+    "total_runs": 5,
+    "total_steps": 11,
+    "replay_fidelity": 1.0,
+    "cost_saved_pct": 0.8144,
+    "score_delta_vs_baseline": -0.0052,
+    "passes_promotion_gate": true,
+    "corrupted_runs": []
+  }
+}

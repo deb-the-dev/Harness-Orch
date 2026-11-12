@@ -1,0 +1,978 @@
+{
+  "summary": {
+    "table_count": 10,
+    "tables": {
+      "customers": 4,
+      "accounts": 4,
+      "transactions": 5,
+      "cards": 4,
+      "disputes_chargebacks": 3,
+      "refund_requests": 3,
+      "fraud_alerts": 3,
+      "kyc_aml_profiles": 4,
+      "financial_plans": 3,
+      "policy_rules": 5
+    },
+    "task_log_count": 46,
+    "task_log_classes": [
+      "attest_refund",
+      "draft_customer_notice",
+      "rebalance_financial_plan",
+      "triage_dispute",
+      "verify_fraud_signals"
+    ],
+    "context_items": 5,
+    "skills": 2,
+    "memory_facts": 2
+  },
+  "tables": {
+    "customers": [
+      {
+        "customer_id": "CUST-1001",
+        "full_name": "Aarav Mehta",
+        "segment": "retail_premier",
+        "email": "aarav.mehta@example.com",
+        "region": "eu",
+        "tenure_years": 6,
+        "risk_tier": "low"
+      },
+      {
+        "customer_id": "CUST-1002",
+        "full_name": "Nadia Al-Mansoor",
+        "segment": "private_wealth",
+        "email": "nadia.almansoor@example.com",
+        "region": "me",
+        "tenure_years": 9,
+        "risk_tier": "medium"
+      },
+      {
+        "customer_id": "CUST-1003",
+        "full_name": "Marcus Vance",
+        "segment": "commercial_smb",
+        "email": "marcus.vance@example.com",
+        "region": "eu",
+        "tenure_years": 2,
+        "risk_tier": "high"
+      },
+      {
+        "customer_id": "CUST-1004",
+        "full_name": "Elena Rostova",
+        "segment": "retail_standard",
+        "email": "elena.rostova@example.com",
+        "region": "eu",
+        "tenure_years": 4,
+        "risk_tier": "low"
+      }
+    ],
+    "accounts": [
+      {
+        "account_id": "ACC-5001",
+        "customer_id": "CUST-1001",
+        "type": "checking",
+        "currency": "USD",
+        "balance_usd": 24500.0,
+        "status": "active"
+      },
+      {
+        "account_id": "ACC-5002",
+        "customer_id": "CUST-1002",
+        "type": "wealth_reserve",
+        "currency": "USD",
+        "balance_usd": 412000.0,
+        "status": "active"
+      },
+      {
+        "account_id": "ACC-5003",
+        "customer_id": "CUST-1003",
+        "type": "business_checking",
+        "currency": "USD",
+        "balance_usd": 18300.0,
+        "status": "restricted_review"
+      },
+      {
+        "account_id": "ACC-5004",
+        "customer_id": "CUST-1004",
+        "type": "checking",
+        "currency": "USD",
+        "balance_usd": 6200.0,
+        "status": "active"
+      }
+    ],
+    "transactions": [
+      {
+        "txn_id": "TXN-9001",
+        "account_id": "ACC-5001",
+        "merchant": "Nordic Air",
+        "mcc": "4511",
+        "amount_usd": 680.0,
+        "channel": "card_not_present",
+        "status": "settled",
+        "duplicate_of": null
+      },
+      {
+        "txn_id": "TXN-9002",
+        "account_id": "ACC-5001",
+        "merchant": "Nordic Air",
+        "mcc": "4511",
+        "amount_usd": 680.0,
+        "channel": "card_not_present",
+        "status": "settled",
+        "duplicate_of": "TXN-9001"
+      },
+      {
+        "txn_id": "TXN-9003",
+        "account_id": "ACC-5002",
+        "merchant": "ElectroLux Zurich",
+        "mcc": "5732",
+        "amount_usd": 14200.0,
+        "channel": "pos_chip",
+        "status": "settled",
+        "duplicate_of": null
+      },
+      {
+        "txn_id": "TXN-9004",
+        "account_id": "ACC-5003",
+        "merchant": "CryptoBridge FX",
+        "mcc": "6051",
+        "amount_usd": 9800.0,
+        "channel": "wire_api",
+        "status": "settled",
+        "duplicate_of": null
+      },
+      {
+        "txn_id": "TXN-9005",
+        "account_id": "ACC-5004",
+        "merchant": "CloudBooks SaaS",
+        "mcc": "5734",
+        "amount_usd": 149.0,
+        "channel": "recurring_card",
+        "status": "settled",
+        "duplicate_of": null
+      }
+    ],
+    "cards": [
+      {
+        "card_id": "CARD-301",
+        "account_id": "ACC-5001",
+        "network": "Visa",
+        "last4": "4412",
+        "status": "active",
+        "card_present_enabled": true
+      },
+      {
+        "card_id": "CARD-302",
+        "account_id": "ACC-5002",
+        "network": "Mastercard",
+        "last4": "8891",
+        "status": "frozen_pending_review",
+        "card_present_enabled": true
+      },
+      {
+        "card_id": "CARD-303",
+        "account_id": "ACC-5003",
+        "network": "Visa",
+        "last4": "1104",
+        "status": "active",
+        "card_present_enabled": false
+      },
+      {
+        "card_id": "CARD-304",
+        "account_id": "ACC-5004",
+        "network": "Visa",
+        "last4": "7720",
+        "status": "active",
+        "card_present_enabled": true
+      }
+    ],
+    "disputes_chargebacks": [
+      {
+        "dispute_id": "DSP-7001",
+        "txn_id": "TXN-9002",
+        "customer_id": "CUST-1001",
+        "reason_code": "duplicate_processing",
+        "amount_usd": 680.0,
+        "status": "open",
+        "evidence_strength": "high"
+      },
+      {
+        "dispute_id": "DSP-7002",
+        "txn_id": "TXN-9003",
+        "customer_id": "CUST-1002",
+        "reason_code": "unrecognized_high_value_charge",
+        "amount_usd": 14200.0,
+        "status": "open",
+        "evidence_strength": "medium"
+      },
+      {
+        "dispute_id": "DSP-7003",
+        "txn_id": "TXN-9004",
+        "customer_id": "CUST-1003",
+        "reason_code": "unauthorized_wire_claim",
+        "amount_usd": 9800.0,
+        "status": "escalated_aml",
+        "evidence_strength": "low"
+      }
+    ],
+    "refund_requests": [
+      {
+        "refund_id": "REF-8001",
+        "dispute_id": "DSP-7001",
+        "customer_id": "CUST-1001",
+        "amount_usd": 680.0,
+        "eligible_auto_attest": true,
+        "status": "pending_attestation"
+      },
+      {
+        "refund_id": "REF-8002",
+        "dispute_id": "DSP-7002",
+        "customer_id": "CUST-1002",
+        "amount_usd": 14200.0,
+        "eligible_auto_attest": false,
+        "status": "pending_attestation"
+      },
+      {
+        "refund_id": "REF-8003",
+        "dispute_id": "DSP-7003",
+        "customer_id": "CUST-1003",
+        "amount_usd": 9800.0,
+        "eligible_auto_attest": false,
+        "status": "blocked_aml_review"
+      }
+    ],
+    "fraud_alerts": [
+      {
+        "alert_id": "FRD-6001",
+        "txn_id": "TXN-9002",
+        "score": 0.18,
+        "signal": "merchant_duplicate_batch",
+        "confirmed_fraud": false
+      },
+      {
+        "alert_id": "FRD-6002",
+        "txn_id": "TXN-9003",
+        "score": 0.87,
+        "signal": "geo_velocity_anomaly_zurich",
+        "confirmed_fraud": true
+      },
+      {
+        "alert_id": "FRD-6003",
+        "txn_id": "TXN-9004",
+        "score": 0.94,
+        "signal": "sanctioned_corridor_velocity",
+        "confirmed_fraud": true
+      }
+    ],
+    "kyc_aml_profiles": [
+      {
+        "customer_id": "CUST-1001",
+        "kyc_status": "verified",
+        "aml_flag": false,
+        "pep": false,
+        "last_screened": "2026-10-01"
+      },
+      {
+        "customer_id": "CUST-1002",
+        "kyc_status": "verified",
+        "aml_flag": false,
+        "pep": false,
+        "last_screened": "2026-10-15"
+      },
+      {
+        "customer_id": "CUST-1003",
+        "kyc_status": "enhanced_due_diligence",
+        "aml_flag": true,
+        "pep": false,
+        "last_screened": "2026-11-01"
+      },
+      {
+        "customer_id": "CUST-1004",
+        "kyc_status": "verified",
+        "aml_flag": false,
+        "pep": false,
+        "last_screened": "2026-09-20"
+      }
+    ],
+    "financial_plans": [
+      {
+        "plan_id": "PLN-4001",
+        "customer_id": "CUST-1001",
+        "monthly_cashflow_usd": 8200.0,
+        "emergency_buffer_months": 6,
+        "rebalance_needed": false
+      },
+      {
+        "plan_id": "PLN-4002",
+        "customer_id": "CUST-1002",
+        "monthly_cashflow_usd": 42000.0,
+        "emergency_buffer_months": 12,
+        "rebalance_needed": true
+      },
+      {
+        "plan_id": "PLN-4003",
+        "customer_id": "CUST-1003",
+        "monthly_cashflow_usd": 15000.0,
+        "emergency_buffer_months": 2,
+        "rebalance_needed": true
+      }
+    ],
+    "policy_rules": [
+      {
+        "rule_id": "POL-BNK-001",
+        "domain": "refunds",
+        "summary": "Duplicate merchant charges under $2,500 with verified KYC may be attested for provisional credit; agent never executes wire/payment directly."
+      },
+      {
+        "rule_id": "POL-BNK-002",
+        "domain": "chargebacks",
+        "summary": "Fraud alerts >= 0.80 require second-stage fraud signal verification before chargeback attestation."
+      },
+      {
+        "rule_id": "POL-BNK-003",
+        "domain": "aml",
+        "summary": "Accounts with aml_flag=True or status=restricted_review must block automated refund attestation and escalate to compliance."
+      },
+      {
+        "rule_id": "POL-BNK-004",
+        "domain": "comms",
+        "summary": "All outbound customer notices (external_comm) are draft-only and require human approval before dispatch."
+      },
+      {
+        "rule_id": "POL-BNK-005",
+        "domain": "privacy",
+        "summary": "Customer emails, SSNs, and raw account numbers must be redacted in post_model outputs."
+      }
+    ]
+  },
+  "task_logs": [
+    {
+      "task_class": "triage_dispute",
+      "step_role": "triage",
+      "model_id": "m-small",
+      "success": true,
+      "cost_usd": 6e-05,
+      "latency_ms": 72.0,
+      "prompt_tokens": 220,
+      "completion_tokens": 80,
+      "verifier_score": 0.95
+    },
+    {
+      "task_class": "triage_dispute",
+      "step_role": "triage",
+      "model_id": "m-small",
+      "success": true,
+      "cost_usd": 6e-05,
+      "latency_ms": 72.0,
+      "prompt_tokens": 220,
+      "completion_tokens": 80,
+      "verifier_score": 0.95
+    },
+    {
+      "task_class": "triage_dispute",
+      "step_role": "triage",
+      "model_id": "m-small",
+      "success": true,
+      "cost_usd": 6e-05,
+      "latency_ms": 72.0,
+      "prompt_tokens": 220,
+      "completion_tokens": 80,
+      "verifier_score": 0.95
+    },
+    {
+      "task_class": "triage_dispute",
+      "step_role": "triage",
+      "model_id": "m-small",
+      "success": true,
+      "cost_usd": 6e-05,
+      "latency_ms": 72.0,
+      "prompt_tokens": 220,
+      "completion_tokens": 80,
+      "verifier_score": 0.95
+    },
+    {
+      "task_class": "triage_dispute",
+      "step_role": "triage",
+      "model_id": "m-small",
+      "success": true,
+      "cost_usd": 6e-05,
+      "latency_ms": 72.0,
+      "prompt_tokens": 220,
+      "completion_tokens": 80,
+      "verifier_score": 0.95
+    },
+    {
+      "task_class": "triage_dispute",
+      "step_role": "triage",
+      "model_id": "m-small",
+      "success": true,
+      "cost_usd": 6e-05,
+      "latency_ms": 72.0,
+      "prompt_tokens": 220,
+      "completion_tokens": 80,
+      "verifier_score": 0.95
+    },
+    {
+      "task_class": "triage_dispute",
+      "step_role": "triage",
+      "model_id": "m-small",
+      "success": true,
+      "cost_usd": 6e-05,
+      "latency_ms": 72.0,
+      "prompt_tokens": 220,
+      "completion_tokens": 80,
+      "verifier_score": 0.95
+    },
+    {
+      "task_class": "triage_dispute",
+      "step_role": "triage",
+      "model_id": "m-small",
+      "success": true,
+      "cost_usd": 6e-05,
+      "latency_ms": 72.0,
+      "prompt_tokens": 220,
+      "completion_tokens": 80,
+      "verifier_score": 0.95
+    },
+    {
+      "task_class": "triage_dispute",
+      "step_role": "triage",
+      "model_id": "m-large",
+      "success": true,
+      "cost_usd": 0.0018,
+      "latency_ms": 310.0,
+      "prompt_tokens": 220,
+      "completion_tokens": 80,
+      "verifier_score": 0.96
+    },
+    {
+      "task_class": "verify_fraud_signals",
+      "step_role": "fraud_check",
+      "model_id": "m-medium",
+      "success": true,
+      "cost_usd": 0.00042,
+      "latency_ms": 145.0,
+      "prompt_tokens": 260,
+      "completion_tokens": 95,
+      "verifier_score": 0.94
+    },
+    {
+      "task_class": "verify_fraud_signals",
+      "step_role": "fraud_check",
+      "model_id": "m-medium",
+      "success": true,
+      "cost_usd": 0.00042,
+      "latency_ms": 145.0,
+      "prompt_tokens": 260,
+      "completion_tokens": 95,
+      "verifier_score": 0.94
+    },
+    {
+      "task_class": "verify_fraud_signals",
+      "step_role": "fraud_check",
+      "model_id": "m-medium",
+      "success": true,
+      "cost_usd": 0.00042,
+      "latency_ms": 145.0,
+      "prompt_tokens": 260,
+      "completion_tokens": 95,
+      "verifier_score": 0.94
+    },
+    {
+      "task_class": "verify_fraud_signals",
+      "step_role": "fraud_check",
+      "model_id": "m-medium",
+      "success": true,
+      "cost_usd": 0.00042,
+      "latency_ms": 145.0,
+      "prompt_tokens": 260,
+      "completion_tokens": 95,
+      "verifier_score": 0.94
+    },
+    {
+      "task_class": "verify_fraud_signals",
+      "step_role": "fraud_check",
+      "model_id": "m-medium",
+      "success": true,
+      "cost_usd": 0.00042,
+      "latency_ms": 145.0,
+      "prompt_tokens": 260,
+      "completion_tokens": 95,
+      "verifier_score": 0.94
+    },
+    {
+      "task_class": "verify_fraud_signals",
+      "step_role": "fraud_check",
+      "model_id": "m-medium",
+      "success": true,
+      "cost_usd": 0.00042,
+      "latency_ms": 145.0,
+      "prompt_tokens": 260,
+      "completion_tokens": 95,
+      "verifier_score": 0.94
+    },
+    {
+      "task_class": "verify_fraud_signals",
+      "step_role": "fraud_check",
+      "model_id": "m-medium",
+      "success": true,
+      "cost_usd": 0.00042,
+      "latency_ms": 145.0,
+      "prompt_tokens": 260,
+      "completion_tokens": 95,
+      "verifier_score": 0.94
+    },
+    {
+      "task_class": "verify_fraud_signals",
+      "step_role": "fraud_check",
+      "model_id": "m-medium",
+      "success": true,
+      "cost_usd": 0.00042,
+      "latency_ms": 145.0,
+      "prompt_tokens": 260,
+      "completion_tokens": 95,
+      "verifier_score": 0.94
+    },
+    {
+      "task_class": "verify_fraud_signals",
+      "step_role": "fraud_check",
+      "model_id": "m-small",
+      "success": false,
+      "cost_usd": 7e-05,
+      "latency_ms": 68.0,
+      "prompt_tokens": 260,
+      "completion_tokens": 95,
+      "verifier_score": 0.76
+    },
+    {
+      "task_class": "verify_fraud_signals",
+      "step_role": "fraud_check",
+      "model_id": "m-small",
+      "success": false,
+      "cost_usd": 7e-05,
+      "latency_ms": 68.0,
+      "prompt_tokens": 260,
+      "completion_tokens": 95,
+      "verifier_score": 0.76
+    },
+    {
+      "task_class": "verify_fraud_signals",
+      "step_role": "fraud_check",
+      "model_id": "m-small",
+      "success": false,
+      "cost_usd": 7e-05,
+      "latency_ms": 68.0,
+      "prompt_tokens": 260,
+      "completion_tokens": 95,
+      "verifier_score": 0.76
+    },
+    {
+      "task_class": "verify_fraud_signals",
+      "step_role": "fraud_check",
+      "model_id": "m-small",
+      "success": false,
+      "cost_usd": 7e-05,
+      "latency_ms": 68.0,
+      "prompt_tokens": 260,
+      "completion_tokens": 95,
+      "verifier_score": 0.76
+    },
+    {
+      "task_class": "attest_refund",
+      "step_role": "attest",
+      "model_id": "m-medium",
+      "success": true,
+      "cost_usd": 0.00048,
+      "latency_ms": 160.0,
+      "prompt_tokens": 300,
+      "completion_tokens": 110,
+      "verifier_score": 0.95
+    },
+    {
+      "task_class": "attest_refund",
+      "step_role": "attest",
+      "model_id": "m-medium",
+      "success": true,
+      "cost_usd": 0.00048,
+      "latency_ms": 160.0,
+      "prompt_tokens": 300,
+      "completion_tokens": 110,
+      "verifier_score": 0.95
+    },
+    {
+      "task_class": "attest_refund",
+      "step_role": "attest",
+      "model_id": "m-medium",
+      "success": true,
+      "cost_usd": 0.00048,
+      "latency_ms": 160.0,
+      "prompt_tokens": 300,
+      "completion_tokens": 110,
+      "verifier_score": 0.95
+    },
+    {
+      "task_class": "attest_refund",
+      "step_role": "attest",
+      "model_id": "m-medium",
+      "success": true,
+      "cost_usd": 0.00048,
+      "latency_ms": 160.0,
+      "prompt_tokens": 300,
+      "completion_tokens": 110,
+      "verifier_score": 0.95
+    },
+    {
+      "task_class": "attest_refund",
+      "step_role": "attest",
+      "model_id": "m-medium",
+      "success": true,
+      "cost_usd": 0.00048,
+      "latency_ms": 160.0,
+      "prompt_tokens": 300,
+      "completion_tokens": 110,
+      "verifier_score": 0.95
+    },
+    {
+      "task_class": "attest_refund",
+      "step_role": "attest",
+      "model_id": "m-medium",
+      "success": true,
+      "cost_usd": 0.00048,
+      "latency_ms": 160.0,
+      "prompt_tokens": 300,
+      "completion_tokens": 110,
+      "verifier_score": 0.95
+    },
+    {
+      "task_class": "attest_refund",
+      "step_role": "attest",
+      "model_id": "m-medium",
+      "success": true,
+      "cost_usd": 0.00048,
+      "latency_ms": 160.0,
+      "prompt_tokens": 300,
+      "completion_tokens": 110,
+      "verifier_score": 0.95
+    },
+    {
+      "task_class": "attest_refund",
+      "step_role": "attest",
+      "model_id": "m-medium",
+      "success": true,
+      "cost_usd": 0.00048,
+      "latency_ms": 160.0,
+      "prompt_tokens": 300,
+      "completion_tokens": 110,
+      "verifier_score": 0.95
+    },
+    {
+      "task_class": "attest_refund",
+      "step_role": "attest",
+      "model_id": "m-large",
+      "success": true,
+      "cost_usd": 0.00195,
+      "latency_ms": 340.0,
+      "prompt_tokens": 300,
+      "completion_tokens": 110,
+      "verifier_score": 0.96
+    },
+    {
+      "task_class": "draft_customer_notice",
+      "step_role": "draft_notice",
+      "model_id": "m-small",
+      "success": true,
+      "cost_usd": 8e-05,
+      "latency_ms": 80.0,
+      "prompt_tokens": 240,
+      "completion_tokens": 120,
+      "verifier_score": 0.94
+    },
+    {
+      "task_class": "draft_customer_notice",
+      "step_role": "draft_notice",
+      "model_id": "m-small",
+      "success": true,
+      "cost_usd": 8e-05,
+      "latency_ms": 80.0,
+      "prompt_tokens": 240,
+      "completion_tokens": 120,
+      "verifier_score": 0.94
+    },
+    {
+      "task_class": "draft_customer_notice",
+      "step_role": "draft_notice",
+      "model_id": "m-small",
+      "success": true,
+      "cost_usd": 8e-05,
+      "latency_ms": 80.0,
+      "prompt_tokens": 240,
+      "completion_tokens": 120,
+      "verifier_score": 0.94
+    },
+    {
+      "task_class": "draft_customer_notice",
+      "step_role": "draft_notice",
+      "model_id": "m-small",
+      "success": true,
+      "cost_usd": 8e-05,
+      "latency_ms": 80.0,
+      "prompt_tokens": 240,
+      "completion_tokens": 120,
+      "verifier_score": 0.94
+    },
+    {
+      "task_class": "draft_customer_notice",
+      "step_role": "draft_notice",
+      "model_id": "m-small",
+      "success": true,
+      "cost_usd": 8e-05,
+      "latency_ms": 80.0,
+      "prompt_tokens": 240,
+      "completion_tokens": 120,
+      "verifier_score": 0.94
+    },
+    {
+      "task_class": "draft_customer_notice",
+      "step_role": "draft_notice",
+      "model_id": "m-small",
+      "success": true,
+      "cost_usd": 8e-05,
+      "latency_ms": 80.0,
+      "prompt_tokens": 240,
+      "completion_tokens": 120,
+      "verifier_score": 0.94
+    },
+    {
+      "task_class": "draft_customer_notice",
+      "step_role": "draft_notice",
+      "model_id": "m-small",
+      "success": true,
+      "cost_usd": 8e-05,
+      "latency_ms": 80.0,
+      "prompt_tokens": 240,
+      "completion_tokens": 120,
+      "verifier_score": 0.94
+    },
+    {
+      "task_class": "draft_customer_notice",
+      "step_role": "draft_notice",
+      "model_id": "m-small",
+      "success": true,
+      "cost_usd": 8e-05,
+      "latency_ms": 80.0,
+      "prompt_tokens": 240,
+      "completion_tokens": 120,
+      "verifier_score": 0.94
+    },
+    {
+      "task_class": "rebalance_financial_plan",
+      "step_role": "plan_review",
+      "model_id": "m-medium",
+      "success": true,
+      "cost_usd": 0.0005,
+      "latency_ms": 175.0,
+      "prompt_tokens": 320,
+      "completion_tokens": 130,
+      "verifier_score": 0.94
+    },
+    {
+      "task_class": "rebalance_financial_plan",
+      "step_role": "plan_review",
+      "model_id": "m-medium",
+      "success": true,
+      "cost_usd": 0.0005,
+      "latency_ms": 175.0,
+      "prompt_tokens": 320,
+      "completion_tokens": 130,
+      "verifier_score": 0.94
+    },
+    {
+      "task_class": "rebalance_financial_plan",
+      "step_role": "plan_review",
+      "model_id": "m-medium",
+      "success": true,
+      "cost_usd": 0.0005,
+      "latency_ms": 175.0,
+      "prompt_tokens": 320,
+      "completion_tokens": 130,
+      "verifier_score": 0.94
+    },
+    {
+      "task_class": "rebalance_financial_plan",
+      "step_role": "plan_review",
+      "model_id": "m-medium",
+      "success": true,
+      "cost_usd": 0.0005,
+      "latency_ms": 175.0,
+      "prompt_tokens": 320,
+      "completion_tokens": 130,
+      "verifier_score": 0.94
+    },
+    {
+      "task_class": "rebalance_financial_plan",
+      "step_role": "plan_review",
+      "model_id": "m-medium",
+      "success": true,
+      "cost_usd": 0.0005,
+      "latency_ms": 175.0,
+      "prompt_tokens": 320,
+      "completion_tokens": 130,
+      "verifier_score": 0.94
+    },
+    {
+      "task_class": "rebalance_financial_plan",
+      "step_role": "plan_review",
+      "model_id": "m-medium",
+      "success": true,
+      "cost_usd": 0.0005,
+      "latency_ms": 175.0,
+      "prompt_tokens": 320,
+      "completion_tokens": 130,
+      "verifier_score": 0.94
+    },
+    {
+      "task_class": "rebalance_financial_plan",
+      "step_role": "plan_review",
+      "model_id": "m-medium",
+      "success": true,
+      "cost_usd": 0.0005,
+      "latency_ms": 175.0,
+      "prompt_tokens": 320,
+      "completion_tokens": 130,
+      "verifier_score": 0.94
+    },
+    {
+      "task_class": "rebalance_financial_plan",
+      "step_role": "plan_review",
+      "model_id": "m-medium",
+      "success": true,
+      "cost_usd": 0.0005,
+      "latency_ms": 175.0,
+      "prompt_tokens": 320,
+      "completion_tokens": 130,
+      "verifier_score": 0.94
+    }
+  ],
+  "context_items": [
+    {
+      "source_id": "bank-policy-corpus",
+      "external_id": "POL-BNK-001",
+      "kind": "policy",
+      "title": "Enterprise Bank Policy (REFUNDS)",
+      "content": "Duplicate merchant charges under $2,500 with verified KYC may be attested for provisional credit; agent never executes wire/payment directly.",
+      "version_no": 1,
+      "owner": "chief-risk-officer@bank.example",
+      "data_class": "internal",
+      "allowed_teams": [
+        "finance",
+        "fde",
+        "customer_service",
+        "risk"
+      ]
+    },
+    {
+      "source_id": "bank-policy-corpus",
+      "external_id": "POL-BNK-002",
+      "kind": "policy",
+      "title": "Enterprise Bank Policy (CHARGEBACKS)",
+      "content": "Fraud alerts >= 0.80 require second-stage fraud signal verification before chargeback attestation.",
+      "version_no": 1,
+      "owner": "chief-risk-officer@bank.example",
+      "data_class": "internal",
+      "allowed_teams": [
+        "finance",
+        "fde",
+        "customer_service",
+        "risk"
+      ]
+    },
+    {
+      "source_id": "bank-policy-corpus",
+      "external_id": "POL-BNK-003",
+      "kind": "policy",
+      "title": "Enterprise Bank Policy (AML)",
+      "content": "Accounts with aml_flag=True or status=restricted_review must block automated refund attestation and escalate to compliance.",
+      "version_no": 1,
+      "owner": "chief-risk-officer@bank.example",
+      "data_class": "internal",
+      "allowed_teams": [
+        "finance",
+        "fde",
+        "customer_service",
+        "risk"
+      ]
+    },
+    {
+      "source_id": "bank-policy-corpus",
+      "external_id": "POL-BNK-004",
+      "kind": "policy",
+      "title": "Enterprise Bank Policy (COMMS)",
+      "content": "All outbound customer notices (external_comm) are draft-only and require human approval before dispatch.",
+      "version_no": 1,
+      "owner": "chief-risk-officer@bank.example",
+      "data_class": "internal",
+      "allowed_teams": [
+        "finance",
+        "fde",
+        "customer_service",
+        "risk"
+      ]
+    },
+    {
+      "source_id": "bank-policy-corpus",
+      "external_id": "POL-BNK-005",
+      "kind": "policy",
+      "title": "Enterprise Bank Policy (PRIVACY)",
+      "content": "Customer emails, SSNs, and raw account numbers must be redacted in post_model outputs.",
+      "version_no": 1,
+      "owner": "chief-risk-officer@bank.example",
+      "data_class": "internal",
+      "allowed_teams": [
+        "finance",
+        "fde",
+        "customer_service",
+        "risk"
+      ]
+    }
+  ],
+  "skills": [
+    {
+      "name": "reg_e_chargeback_sop",
+      "description": "Regulation E provisional credit and chargeback evidence verification procedure.",
+      "body": "1) Check kyc_aml_profiles for aml_flag. 2) Check fraud_alerts score. 3) Attest refund only if aml_flag is false; never trigger direct payment.",
+      "version_no": 1,
+      "data_class": "internal"
+    },
+    {
+      "name": "wealth_plan_rebalance_sop",
+      "description": "Financial planning buffer and cashflow impact assessment after chargeback/refund.",
+      "body": "Ensure emergency_buffer_months >= 3 before recommending discretionary liquidity reallocation.",
+      "version_no": 1,
+      "data_class": "confidential"
+    }
+  ],
+  "memory_facts": [
+    {
+      "scope_type": "org",
+      "scope_id": "org-enterprise-bank",
+      "key": "provisional_credit_cap",
+      "content": "Automated refund attestations above $2,500 require enhanced fraud signal verification.",
+      "data_class": "internal",
+      "tags": [
+        "refund",
+        "chargeback",
+        "fraud"
+      ]
+    },
+    {
+      "scope_type": "team",
+      "scope_id": "finance",
+      "key": "aml_hard_block_rule",
+      "content": "Any customer with aml_flag=True (e.g. CUST-1003) must have refund attestation denied and escalated.",
+      "data_class": "confidential",
+      "tags": [
+        "aml",
+        "kyc",
+        "refund"
+      ]
+    }
+  ]
+}
