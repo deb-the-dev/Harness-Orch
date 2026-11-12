@@ -10,12 +10,117 @@ from __future__ import annotations
 import time
 from typing import Any
 
+from pydantic import BaseModel, Field
+
 from .context import Principal
 from .fde import FDEDeployment
 from .ids import uuid7
 from .policy import EmbeddedPolicyClient
 from .router import RouterError, RoutingRequest
 from .runs import InvalidTransition
+
+
+class DeploymentConfigPayload(BaseModel):
+    organization: dict[str, Any] = Field(default_factory=lambda: {"org_id": "org-default", "name": "Enterprise Org", "region": "eu"})
+    memory_engine: str = "graphiti"
+    routing_map: list[dict[str, Any]] = Field(default_factory=list)
+    context_items: list[dict[str, Any]] = Field(default_factory=list)
+    skills: list[dict[str, Any]] = Field(default_factory=list)
+    memory_facts: list[dict[str, Any]] = Field(default_factory=list)
+    task_logs: list[dict[str, Any]] = Field(default_factory=list)
+    custom_workflows: list[dict[str, Any]] = Field(default_factory=list)
+
+
+class SprinkleContextPayload(BaseModel):
+    items: list[dict[str, Any]] = Field(default_factory=list)
+    skills: list[dict[str, Any]] = Field(default_factory=list)
+
+
+class SprinkleMemoryPayload(BaseModel):
+    facts: list[dict[str, Any]] = Field(default_factory=list)
+
+
+class SprinkleTaskLogsPayload(BaseModel):
+    logs: list[dict[str, Any]] = Field(default_factory=list)
+
+
+class ContextQueryPayload(BaseModel):
+    query: str
+    run_id: str = "api-context-query"
+    step_id: str = "step-0"
+    principal_id: str = "fde-operator"
+    teams: list[str] = Field(default_factory=lambda: ["finance", "fde"])
+    max_clearance: str = "restricted"
+    limit: int = 6
+
+
+class RoutePreviewPayload(BaseModel):
+    task_class: str
+    step_role: str = "*"
+    allowed_models: list[str] | None = None
+    stronger_than: str | None = None
+
+
+class SubmitRunPayload(BaseModel):
+    org_id: str = "org-default"
+    run_id: str | None = None
+    pack: str = "ap_logging"
+    input: dict[str, Any] = Field(default_factory=dict)
+    budget_usd: float = 1.0
+    started_by: str = "fde-operator"
+    auto_execute: bool = True
+
+
+class ApprovalDecisionPayload(BaseModel):
+    org_id: str = "org-default"
+    approved: bool
+    approver: str = "compliance-officer"
+    auto_resume: bool = True
+
+
+class ForkRunPayload(BaseModel):
+    org_id: str = "org-default"
+    upto_seq: int
+    new_run_id: str | None = None
+    auto_execute: bool = False
+
+
+class SubagentSpawnPayload(BaseModel):
+    org_id: str = "org-default"
+    parent_run_id: str
+    child_pack: str
+    input: dict[str, Any] = Field(default_factory=dict)
+    budget_usd: float = 0.25
+    started_by: str = "subagent"
+
+
+class ReplayRequestPayload(BaseModel):
+    org_id: str = "org-default"
+    run_ids: list[str] | None = None
+    baseline_model_id: str | None = None
+    cost_saving_target: float = 0.30
+    max_quality_drop: float = 0.01
+
+
+class KillSwitchPayload(BaseModel):
+    org_id: str = "org-default"
+    active: bool
+    pack: str | None = None
+
+
+class ChatCompletionPayload(BaseModel):
+    model: str = "auto"
+    messages: list[dict[str, Any]]
+    max_tokens: int = 512
+    org_id: str = "org-default"
+    run_id: str | None = None
+    step_id: str = "ext-step-0"
+    pack: str = "ap_logging"
+    step_role: str = "extract"
+    task_class: str = "extract"
+    data_class: str = "internal"
+    allowed_models: list[str] | None = None
+    run_limit_usd: float = 1.0
 
 
 class ControlPlaneManager:
@@ -44,7 +149,6 @@ class ControlPlaneManager:
 def create_app(manager: ControlPlaneManager | None = None) -> Any:
     """Creates and configures the FastAPI Control-Plane and Router application."""
     from fastapi import FastAPI, HTTPException
-    from pydantic import BaseModel, Field
 
     mgr = manager or ControlPlaneManager()
     app = FastAPI(
@@ -53,96 +157,6 @@ def create_app(manager: ControlPlaneManager | None = None) -> Any:
         description="Enterprise control plane, step-aware model router, FDE customization layer, and replay engine.",
     )
     app.state.manager = mgr
-
-    class DeploymentConfigPayload(BaseModel):
-        organization: dict[str, Any] = Field(default_factory=lambda: {"org_id": "org-default", "name": "Enterprise Org", "region": "eu"})
-        memory_engine: str = "graphiti"
-        routing_map: list[dict[str, Any]] = Field(default_factory=list)
-        context_items: list[dict[str, Any]] = Field(default_factory=list)
-        skills: list[dict[str, Any]] = Field(default_factory=list)
-        memory_facts: list[dict[str, Any]] = Field(default_factory=list)
-        task_logs: list[dict[str, Any]] = Field(default_factory=list)
-        custom_workflows: list[dict[str, Any]] = Field(default_factory=list)
-
-    class SprinkleContextPayload(BaseModel):
-        items: list[dict[str, Any]] = Field(default_factory=list)
-        skills: list[dict[str, Any]] = Field(default_factory=list)
-
-    class SprinkleMemoryPayload(BaseModel):
-        facts: list[dict[str, Any]] = Field(default_factory=list)
-
-    class SprinkleTaskLogsPayload(BaseModel):
-        logs: list[dict[str, Any]] = Field(default_factory=list)
-
-    class ContextQueryPayload(BaseModel):
-        query: str
-        run_id: str = "api-context-query"
-        step_id: str = "step-0"
-        principal_id: str = "fde-operator"
-        teams: list[str] = Field(default_factory=lambda: ["finance", "fde"])
-        max_clearance: str = "restricted"
-        limit: int = 6
-
-    class RoutePreviewPayload(BaseModel):
-        task_class: str
-        step_role: str = "*"
-        allowed_models: list[str] | None = None
-        stronger_than: str | None = None
-
-    class SubmitRunPayload(BaseModel):
-        org_id: str = "org-default"
-        run_id: str | None = None
-        pack: str = "ap_logging"
-        input: dict[str, Any] = Field(default_factory=dict)
-        budget_usd: float = 1.0
-        started_by: str = "fde-operator"
-        auto_execute: bool = True
-
-    class ApprovalDecisionPayload(BaseModel):
-        org_id: str = "org-default"
-        approved: bool
-        approver: str = "compliance-officer"
-        auto_resume: bool = True
-
-    class ForkRunPayload(BaseModel):
-        org_id: str = "org-default"
-        upto_seq: int
-        new_run_id: str | None = None
-        auto_execute: bool = False
-
-    class SubagentSpawnPayload(BaseModel):
-        org_id: str = "org-default"
-        parent_run_id: str
-        child_pack: str
-        input: dict[str, Any] = Field(default_factory=dict)
-        budget_usd: float = 0.25
-        started_by: str = "subagent"
-
-    class ReplayRequestPayload(BaseModel):
-        org_id: str = "org-default"
-        run_ids: list[str] | None = None
-        baseline_model_id: str | None = None
-        cost_saving_target: float = 0.30
-        max_quality_drop: float = 0.01
-
-    class KillSwitchPayload(BaseModel):
-        org_id: str = "org-default"
-        active: bool
-        pack: str | None = None
-
-    class ChatCompletionPayload(BaseModel):
-        model: str = "auto"
-        messages: list[dict[str, Any]]
-        max_tokens: int = 512
-        org_id: str = "org-default"
-        run_id: str | None = None
-        step_id: str = "ext-step-0"
-        pack: str = "ap_logging"
-        step_role: str = "extract"
-        task_class: str = "extract"
-        data_class: str = "internal"
-        allowed_models: list[str] | None = None
-        run_limit_usd: float = 1.0
 
     @app.get("/healthz")
     async def healthz() -> dict[str, Any]:

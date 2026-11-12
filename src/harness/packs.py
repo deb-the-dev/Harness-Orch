@@ -138,7 +138,7 @@ class ContractPaymentsPack:
     name: str = "contract_payments"
     task_class: str = "reconcile"
     data_class: str = "confidential"
-    allowed_models: list[str] = field(default_factory=lambda: ["m-small", "m-large"])
+    allowed_models: list[str] = field(default_factory=lambda: ["m-small", "m-medium", "m-large"])
     restricted_regions: list[str] = field(default_factory=lambda: ["me", "eu"])
     tools: tuple[str, ...] = ("fetch_contract_terms", "log_reconciliation", "read_artifact")
 
@@ -185,7 +185,7 @@ class PayoutTermsReviewPack:
     name: str = "payout_terms_review"
     task_class: str = "clause_review"
     data_class: str = "confidential"
-    allowed_models: list[str] = field(default_factory=lambda: ["m-small", "m-large"])
+    allowed_models: list[str] = field(default_factory=lambda: ["m-small", "m-medium", "m-large"])
     restricted_regions: list[str] = field(default_factory=lambda: ["me", "eu"])
     tools: tuple[str, ...] = ("log_terms_review", "read_artifact")
     rubric: "Rubric | None" = None

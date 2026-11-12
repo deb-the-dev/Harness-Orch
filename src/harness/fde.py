@@ -16,7 +16,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-from .artifacts import ArtifactStore, Offloader, make_read_tool
+from .artifacts import LocalArtifactStore, Offloader, make_read_artifact_tool
 from .compaction import Compactor
 from .context import (
     ContextService,
@@ -413,7 +413,7 @@ class FDEDeployment:
         )
 
         self.compactor = Compactor(self.router, self.artifact_store, self.log, self.org_id)
-        self.grader = RubricGrader(self.router)
+        self.grader = RubricGrader(self.router, self.log, self.org_id)
         self.orchestrator = Orchestrator(self.log, self.org_id)
         self.worker = Worker(
             log=self.log,
@@ -476,7 +476,7 @@ class FDEDeployment:
             rules=[
                 RouteRule("extract", "extract", {"m-small": 0.92, "m-medium": 0.93, "m-large": 0.94}, quality_tolerance=0.03),
                 RouteRule("extract", "*", {"m-small": 0.91, "m-medium": 0.93, "m-large": 0.94}, quality_tolerance=0.03),
-                RouteRule("reconcile", "reconcile_terms", {"m-small": 0.82, "m-medium": 0.92, "m-large": 0.94}, quality_tolerance=0.03),
+                RouteRule("reconcile", "reconcile_terms", {"m-small": 0.82, "m-medium": 0.935, "m-large": 0.94}, quality_tolerance=0.03),
                 RouteRule("clause_review", "clause_extraction", {"m-small": 0.78, "m-medium": 0.91, "m-large": 0.96}, quality_tolerance=0.03),
                 RouteRule("negotiation", "negotiation_strategy", {"m-small": 0.74, "m-medium": 0.86, "m-large": 0.95}, quality_tolerance=0.03),
                 RouteRule("custom", "*", {"m-small": 0.89, "m-medium": 0.92, "m-large": 0.95}, quality_tolerance=0.04),
@@ -506,16 +506,16 @@ class FDEDeployment:
                     })
                 else:
                     txt = json.dumps({"vendor": "Acme Cloud Corp", "amount": 4250.0, "status": "ok"})
-                return Completion(text=txt, prompt_tokens=180, completion_tokens=64, latency_ms=4.2)
+                return Completion(text=txt, prompt_tokens=180, completion_tokens=64, latency_ms=4.2, provider_model=model.litellm_model)
 
         return _DeterministicAdapter()
 
     def _register_default_tools(self, artifact_dir: str | Path | None = None) -> None:
         import tempfile
         base_dir = Path(artifact_dir) if artifact_dir else Path(tempfile.mkdtemp(prefix="harness-artifacts-"))
-        self.artifact_store = ArtifactStore(base_dir)
+        self.artifact_store = LocalArtifactStore(base_dir)
         self.offloader = Offloader(self.artifact_store, self.log, self.org_id, threshold_bytes=4096)
-        self.tools.register(make_read_tool(self.artifact_store, self.log, self.org_id))
+        self.tools.register(make_read_artifact_tool(self.artifact_store, self.org_id))
 
         async def _log_invoice(args: dict[str, Any]) -> dict[str, Any]:
             return {"logged": True, "vendor": args["vendor"], "amount": args["amount"]}
